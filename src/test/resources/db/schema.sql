@@ -1,56 +1,60 @@
-CREATE TABLE PLACES
-(
-    `place_id`  BINARY(16)    NOT NULL    COMMENT 'PlaceID',
-    PRIMARY KEY (place_id)
-);
+-- 테이블 순서는 관계를 고려하여 한 번에 실행해도 에러가 발생하지 않게 정렬되었습니다.
 
-CREATE TABLE USERS
+-- USERS Table Create SQL
+CREATE TABLE users
 (
-    `user_id`  BINARY(16)    NOT NULL    COMMENT 'userID',
+    `user_id`    BINARY(16)    NOT NULL    COMMENT '유저 아이디',
+    `cur_point`  INT           NOT NULL    DEFAULT 0 COMMENT '현재 보유하고 있는 포인트',
     PRIMARY KEY (user_id)
 );
 
-CREATE TABLE REVIEWS
+
+-- REVIEWS Table Create SQL
+CREATE TABLE reviews
 (
-    `review_id`  BINARY(16)    NOT NULL    COMMENT 'ReviewID',
-    `content`    LONGTEXT      NULL        COMMENT 'Content',
-    `user_id`    BINARY(16)    NULL        COMMENT 'userID',
-    `place_id`   BINARY(16)    NULL        COMMENT 'PlaceID',
-    PRIMARY KEY (review_id)
+    `review_history_id`  BINARY(16)    NOT NULL    COMMENT '리뷰 변경 내역 아이디',
+    `review_id`          BINARY(16)    NOT NULL    COMMENT '리뷰 아이디',
+    `user_id`            BINARY(16)    NOT NULL    COMMENT '유저 아이디',
+    `place_id`           BINARY(16)    NOT NULL    COMMENT '장소 아이디',
+    `content`            LONGTEXT      NULL        COMMENT '리뷰 내용',
+    PRIMARY KEY (review_history_id)
 );
 
-ALTER TABLE REVIEWS
+-- ALTER TABLE REVIEWS COMMENT '리뷰 변경 내역 추척';
+
+ALTER TABLE reviews
     ADD CONSTRAINT FK_REVIEWS_user_id_USERS_user_id FOREIGN KEY (user_id)
-        REFERENCES USERS (user_id) ON DELETE RESTRICT ON UPDATE RESTRICT;
+        REFERENCES users (user_id) ON DELETE RESTRICT ON UPDATE RESTRICT;
 
-ALTER TABLE REVIEWS
-    ADD CONSTRAINT FK_REVIEWS_place_id_PLACES_place_id FOREIGN KEY (place_id)
-        REFERENCES PLACES (place_id) ON DELETE RESTRICT ON UPDATE RESTRICT;
 
-CREATE TABLE POINT_HISTORY
+-- POINT_HISTORY Table Create SQL
+CREATE TABLE point_history
 (
     `point_history_id`  BINARY(16)     NOT NULL    COMMENT 'PointHistoryID',
-    `type`              VARCHAR(45)    NULL        COMMENT 'TYPE',
-    `current_point`     INT            NULL        COMMENT 'CurrentPoint',
-    `create_datetime`   TIMESTAMP      NULL        COMMENT 'CreateDateTime',
     `user_id`           BINARY(16)     NULL        COMMENT 'UserID',
+    `type`              VARCHAR(45)    NULL        COMMENT 'TYPE',
+    `create_datetime`   TIMESTAMP      NULL        COMMENT 'CreateDateTime',
     `update_point`      INT            NULL        COMMENT 'Update History Point',
     PRIMARY KEY (point_history_id)
 );
 
-ALTER TABLE POINT_HISTORY
+ALTER TABLE point_history
     ADD CONSTRAINT FK_POINT_HISTORY_user_id_USERS_user_id FOREIGN KEY (user_id)
-        REFERENCES USERS (user_id) ON DELETE RESTRICT ON UPDATE RESTRICT;
+        REFERENCES users (user_id) ON DELETE RESTRICT ON UPDATE RESTRICT;
 
 
-CREATE TABLE IMAGES
+-- IMAGES Table Create SQL
+CREATE TABLE images
 (
-    `image_id`   BINARY(16)      NOT NULL    COMMENT 'ImageID',
-    `url`        VARCHAR(255)    NULL        COMMENT 'URL',
-    `review_id`  BINARY(16)      NULL        COMMENT 'ReviewID',
-    PRIMARY KEY (image_id)
+    `image_history_id`   BINARY(16)    NOT NULL    COMMENT '이미지 변경 내역 아이디',
+    `review_history_id`  BINARY(16)    NOT NULL    COMMENT '리뷰 변경 내역 아이디',
+    `image_id`           BINARY(16)    NOT NULL    COMMENT '이미지 아이디',
+    PRIMARY KEY (image_history_id)
 );
 
-ALTER TABLE IMAGES
-    ADD CONSTRAINT FK_IMAGES_review_id_REVIEWS_review_id FOREIGN KEY (review_id)
-        REFERENCES REVIEWS (review_id) ON DELETE RESTRICT ON UPDATE RESTRICT;
+-- ALTER TABLE IMAGES COMMENT '리뷰용 사진 (변경 내역이 추적되야함)';
+
+ALTER TABLE images
+    ADD CONSTRAINT FK_IMAGES_review_history_id_REVIEWS_review_history_id FOREIGN KEY (review_history_id)
+        REFERENCES reviews (review_history_id) ON DELETE RESTRICT ON UPDATE RESTRICT;
+

@@ -39,4 +39,16 @@ public class Reviews {
         this.placeId = placeId;
         this.content = content;
     }
+
+    public void addImage(Images image) {
+        if (!images.contains(image)) {
+            images.add(image);
+            image.setReview(this);
+        }
+    }
+
+    public void updateContent(String content) {
+        this.content = content;
+    }
+
 }

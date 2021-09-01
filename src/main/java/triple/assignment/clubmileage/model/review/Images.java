@@ -32,4 +32,8 @@ public class Images {
         this.imageId = imageId;
         this.review = review;
     }
+
+    public void setReview(Reviews review) {
+        this.review = review;
+    }
 }

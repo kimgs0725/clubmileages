@@ -1,13 +1,15 @@
 package triple.assignment.clubmileage.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import triple.assignment.clubmileage.handler.ReviewEvent;
 import triple.assignment.clubmileage.model.points.PointHistory;
 import triple.assignment.clubmileage.model.points.PointHistoryType;
 import triple.assignment.clubmileage.model.points.PointsHistoryRepository;
+import triple.assignment.clubmileage.model.review.Images;
+import triple.assignment.clubmileage.model.review.ReviewRepository;
+import triple.assignment.clubmileage.model.review.Reviews;
 import triple.assignment.clubmileage.model.users.Users;
 import triple.assignment.clubmileage.model.users.UsersRepository;
 import triple.assignment.clubmileage.service.PointService;
@@ -18,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +29,8 @@ public class PointServiceImpl implements PointService {
     private final UsersRepository usersRepository;
 
     private final PointsHistoryRepository pointsHistoryRepository;
+
+    private final ReviewRepository reviewRepository;
 
     /**
      * 유저가 가지고 있는 포인트 현황을 반환한다.
@@ -39,13 +44,12 @@ public class PointServiceImpl implements PointService {
         List<PointHistory> pointHistories = pointsHistoryRepository.findPointHistoriesByUser(user);
         ShowPointResponseDto responseDto = new ShowPointResponseDto();
         responseDto.setUserId(userId);
-        responseDto.setCurrentPoint(pointHistories.get(0).getCurrentPoint());
+        responseDto.setCurrentPoint(user.getPoint());
         List<ShowPointDetailResponseDto> detailResponseDtos = new ArrayList<>();
         for (PointHistory pointHistory : pointHistories) {
             ShowPointDetailResponseDto detailResponseDto = new ShowPointDetailResponseDto();
             detailResponseDto.setAction(pointHistory.getType().getValue());
             detailResponseDto.setUpdatePoint(pointHistory.getUpdatePoint());
-            detailResponseDto.setCurrentPoint(pointHistory.getCurrentPoint());
         }
         responseDto.setPointDetails(detailResponseDtos);
         return responseDto;
@@ -79,17 +83,39 @@ public class PointServiceImpl implements PointService {
         return byUser.orElseThrow();
     }
 
+    /**
+     * 리뷰를 추가합니다.
+     * 글만 추가 시, 1점을 얻습니다.
+     * 글 + 사진을 추가할 시, 2점을 얻습니다.
+     * 해당 장소에 대한 첫 리뷰일 시, 보너스 점수(1점)을 얻습니다.
+     * @param user
+     * @param event
+     */
     private void addPoint(Users user, ReviewEvent event) {
+        int point = accumulatePoint(event);
+        PointHistory pointHistory = createPointHistory(user, PointHistoryType.EARN, point);
+        pointsHistoryRepository.save(pointHistory);
+        addReview(user, event);
+    }
+
+    private void addReview(Users user, ReviewEvent event) {
+        Reviews newReview = new Reviews(user.getUserId(),
+                                        UUID.fromString(event.getReviewId()),
+                                        UUID.fromString(event.getPlaceId()),
+                                        event.getContent());
+        reviewRepository.save(newReview);
     }
 
     private Integer accumulatePoint(ReviewEvent request) {
         int point = (!request.getContent().isEmpty() ? 1 : 0);
         point += (!request.getAttachedPhotoIds().isEmpty() ? 1 : 0);
+        point += (!reviewRepository.existsReviewsByPlaceId(UUID.fromString(request.getPlaceId())) ? 1 : 0);
         return point;
     }
 
-    private PointHistory createPointHistory(Users user, Integer point) {
-        PointHistory pointHistory = new PointHistory(PointHistoryType.EARN, point, point);
+    private PointHistory createPointHistory(Users user, PointHistoryType historyType, Integer point) {
+        PointHistory pointHistory = new PointHistory(historyType, point);
+        user.calculatePoint(historyType, point);
         pointHistory.setUser(user);
         return pointHistory;
     }
@@ -106,6 +132,34 @@ public class PointServiceImpl implements PointService {
      * @param event
      */
     private void updatePoint(Users user, ReviewEvent event) {
+        Reviews review = reviewRepository.findReviewsByReviewId(UUID.fromString(event.getReviewId()));
+        updateContent(user, review, event);
+        updateImage(user, review, event);
+    }
+
+    private void updateContent(Users user, Reviews review, ReviewEvent event) {
+        if (review.getContent().isEmpty() && !event.getContent().isEmpty()) {
+            PointHistory pointHistory = createPointHistory(user, PointHistoryType.EARN, 1);
+            pointsHistoryRepository.save(pointHistory);
+        } else if (!review.getContent().isEmpty() && event.getContent().isEmpty()) {
+            PointHistory pointHistory = createPointHistory(user, PointHistoryType.DEDUCTION, 1);
+            pointsHistoryRepository.save(pointHistory);
+        }
+        review.updateContent(event.getContent());
+    }
+
+    private void updateImage(Users user, Reviews review, ReviewEvent event) {
+        List<Images> images = review.getImages();
+        if (images.isEmpty() && !event.getAttachedPhotoIds().isEmpty()) {
+            PointHistory pointHistory = createPointHistory(user, PointHistoryType.EARN, 1);
+            pointsHistoryRepository.save(pointHistory);
+        } else if (!images.isEmpty() && event.getAttachedPhotoIds().isEmpty()) {
+            PointHistory pointHistory = createPointHistory(user, PointHistoryType.DEDUCTION, 1);
+            pointsHistoryRepository.save(pointHistory);
+        }
+
+        List<UUID> attachedImagesId = event.getAttachedPhotoIds().stream().map(UUID::fromString).collect(Collectors.toList());
+        images.removeIf(i -> !attachedImagesId.contains(i.getImageId()));
     }
 
     /**

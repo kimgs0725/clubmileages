@@ -1,7 +1,7 @@
 package triple.assignment.clubmileage.model.points;
 
 public enum PointHistoryType {
-    REDEEM("REDEEM"), EARN("EARN"), EXPIRE("EXPIRE");
+    DEDUCTION("DEDUCTION"), EARN("EARN");
 
     private String value;
 

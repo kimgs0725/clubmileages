@@ -35,17 +35,13 @@ public class PointHistory {
     @Column(name = "update_point")
     private Integer updatePoint;
 
-    @Column(name = "current_point")
-    private Integer currentPoint;
-
     @Column(name = "create_datetime")
     @CreatedDate
     private LocalDateTime createDatetime;
 
-    public PointHistory(PointHistoryType type, Integer updatePoint, Integer currentPoint) {
+    public PointHistory(PointHistoryType type, Integer updatePoint) {
         this.type = type;
         this.updatePoint = updatePoint;
-        this.currentPoint = currentPoint;
     }
 
     public void setUser(Users user) {
