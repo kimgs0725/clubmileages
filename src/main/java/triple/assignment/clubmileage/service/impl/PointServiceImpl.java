@@ -92,24 +92,26 @@ public class PointServiceImpl implements PointService {
      * @param event
      */
     private void addPoint(Users user, ReviewEvent event) {
-        int point = accumulatePoint(event);
+        boolean isFirstReview = !reviewRepository.existsReviewsByPlaceId(UUID.fromString(event.getPlaceId()));
+        int point = accumulatePoint(event, isFirstReview);
         PointHistory pointHistory = createPointHistory(user, PointHistoryType.EARN, point);
         pointsHistoryRepository.save(pointHistory);
-        addReview(user, event);
+        addReview(user, event, isFirstReview);
     }
 
-    private void addReview(Users user, ReviewEvent event) {
+    private void addReview(Users user, ReviewEvent event, boolean isFirstReview) {
         Reviews newReview = new Reviews(user.getUserId(),
                                         UUID.fromString(event.getReviewId()),
                                         UUID.fromString(event.getPlaceId()),
                                         event.getContent());
+        newReview.setFirstReview(isFirstReview);
         reviewRepository.save(newReview);
     }
 
-    private Integer accumulatePoint(ReviewEvent request) {
+    private Integer accumulatePoint(ReviewEvent request, boolean isFirstReview) {
         int point = (!request.getContent().isEmpty() ? 1 : 0);
         point += (!request.getAttachedPhotoIds().isEmpty() ? 1 : 0);
-        point += (!reviewRepository.existsReviewsByPlaceId(UUID.fromString(request.getPlaceId())) ? 1 : 0);
+        point += (isFirstReview ? 1 : 0);
         return point;
     }
 
@@ -168,6 +170,13 @@ public class PointServiceImpl implements PointService {
      * @param user
      * @param event
      */
-    private void deletePoint(Users user, ReviewEvent event) {}
+    private void deletePoint(Users user, ReviewEvent event) {
+        Reviews review = reviewRepository.findReviewsByReviewId(UUID.fromString(event.getReviewId()));
+        int point = (!review.getContent().isEmpty() ? 1 : 0);
+        point += (!review.getImages().isEmpty() ? 1 : 0);
+        point += (!review.isFirstReview() ? 1 : 0);
+        PointHistory pointHistory = createPointHistory(user, PointHistoryType.DEDUCTION, point);
+        pointsHistoryRepository.save(pointHistory);
+    }
 
 }

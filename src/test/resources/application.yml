@@ -5,15 +5,13 @@ spring:
     username: sa
     password:
   jpa:
-    #database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
     open-in-view: false
     show-sql: true
     hibernate:
       format_sql: true
-      ddl-auto: create
     properties:
       hibernate.default_batch_fetch_size: 100
-  #sql:
-  #  init:
-  #    schema-locations: classpath:/db/schema.sql
-  #    mode: embedded
+  sql:
+    init:
+      schema-locations: classpath:/db/schema.sql
+      mode: embedded

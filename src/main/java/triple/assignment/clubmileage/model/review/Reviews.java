@@ -17,6 +17,9 @@ public class Reviews {
     @Column(name = "review_history_id", columnDefinition = "BINARY(16)")
     private UUID reviewHistoryId;
 
+    @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Images> images = new ArrayList<>();
+
     @Column(name = "user_id", columnDefinition = "BINARY(16)")
     private UUID userId;
 
@@ -26,10 +29,11 @@ public class Reviews {
     @Column(name = "place_id", columnDefinition = "BINARY(16)")
     private UUID placeId;
 
+    @Column(name = "content")
     private String content;
 
-    @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Images> images = new ArrayList<>();
+    @Column(name = "is_first_review")
+    private boolean firstReview = false;
 
     protected Reviews() {}
 
@@ -51,4 +55,7 @@ public class Reviews {
         this.content = content;
     }
 
+    public void setFirstReview(boolean firstReview) {
+        this.firstReview = firstReview;
+    }
 }

@@ -20,10 +20,10 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-//@ExtendWith(SpringExtension.class)
+@ExtendWith(SpringExtension.class)
 @DataJpaTest
-//@TestPropertySource(locations = "classpath:application.yml")
-//@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@TestPropertySource(locations = "classpath:application.yml")
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class UsersRepositoryTest {
 
     @Autowired
@@ -54,12 +54,15 @@ class UsersRepositoryTest {
 
         // when
         usersRepository.save(user);
+        UUID userId = user.getUserId();
+        testEntityManager.flush();
 
         // then
-        assertThat(user.getPoint()).isZero();
-        assertThat(user.getUserId()).isNotNull();
-        log.info("user.point = {}", user.getPoint());
-        log.info("user.userId = {}", user.getUserId());
+        Users findUser = testEntityManager.find(Users.class, userId);
+        assertThat(findUser.getPoint()).isZero();
+        assertThat(findUser.getUserId()).isNotNull();
+        log.info("user.point = {}", findUser.getPoint());
+        log.info("user.userId = {}", findUser.getUserId());
     }
 
     @Test
