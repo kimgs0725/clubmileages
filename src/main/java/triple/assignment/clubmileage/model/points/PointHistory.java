@@ -13,6 +13,7 @@ import java.util.UUID;
 @Entity
 @Getter
 @EntityListeners(AuditingEntityListener.class)
+@Table(name = "POINT_HISTORY")
 public class PointHistory {
     @Id
     @GeneratedValue(generator = "uuid2")
@@ -35,9 +36,11 @@ public class PointHistory {
     @Column(name = "update_point")
     private Integer updatePoint;
 
-    @Column(name = "create_datetime")
     @CreatedDate
+    @Column(name = "create_datetime")
     private LocalDateTime createDatetime;
+
+    protected PointHistory() {}
 
     public PointHistory(PointHistoryType type, Integer updatePoint) {
         this.type = type;

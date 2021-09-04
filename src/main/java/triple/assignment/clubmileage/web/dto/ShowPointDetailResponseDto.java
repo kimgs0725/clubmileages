@@ -3,7 +3,6 @@ package triple.assignment.clubmileage.web.dto;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 @Data

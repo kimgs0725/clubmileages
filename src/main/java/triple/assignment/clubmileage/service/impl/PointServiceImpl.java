@@ -50,6 +50,8 @@ public class PointServiceImpl implements PointService {
             ShowPointDetailResponseDto detailResponseDto = new ShowPointDetailResponseDto();
             detailResponseDto.setAction(pointHistory.getType().getValue());
             detailResponseDto.setUpdatePoint(pointHistory.getUpdatePoint());
+            detailResponseDto.setLocalDateTime(pointHistory.getCreateDatetime());
+            detailResponseDtos.add(detailResponseDto);
         }
         responseDto.setPointDetails(detailResponseDtos);
         return responseDto;
@@ -92,7 +94,7 @@ public class PointServiceImpl implements PointService {
      * @param event
      */
     private void addPoint(Users user, ReviewEvent event) {
-        boolean isFirstReview = !reviewRepository.existsReviewsByPlaceId(UUID.fromString(event.getPlaceId()));
+        boolean isFirstReview = reviewRepository.existsReviewsByPlaceId(UUID.fromString(event.getPlaceId())) == 0;
         int point = accumulatePoint(event, isFirstReview);
         PointHistory pointHistory = createPointHistory(user, PointHistoryType.EARN, point);
         pointsHistoryRepository.save(pointHistory);

@@ -1,7 +1,6 @@
 package triple.assignment.clubmileage.model.review;
 
 import lombok.Getter;
-import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -10,27 +9,25 @@ import java.util.UUID;
 
 @Entity
 @Getter
+@Table(
+        name = "REVIEWS",
+        uniqueConstraints = @UniqueConstraint(
+                columnNames = {"review_id"}
+        )
+)
 public class Reviews {
-    @Id
-    @GeneratedValue(generator = "uuid2")
-    @GenericGenerator(name = "uuid2", strategy = "uuid2")
-    @Column(name = "review_history_id", columnDefinition = "BINARY(16)")
-    private UUID reviewHistoryId;
-
-    @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Images> images = new ArrayList<>();
-
-    @Column(name = "user_id", columnDefinition = "BINARY(16)")
-    private UUID userId;
+    @EmbeddedId
+    private ReviewId reviewHistoryId;
 
     @Column(name = "review_id", columnDefinition = "BINARY(16)")
     private UUID reviewId;
 
-    @Column(name = "place_id", columnDefinition = "BINARY(16)")
-    private UUID placeId;
-
+    @Lob
     @Column(name = "content")
     private String content;
+
+    @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Images> images = new ArrayList<>();
 
     @Column(name = "is_first_review")
     private boolean firstReview = false;
@@ -38,9 +35,8 @@ public class Reviews {
     protected Reviews() {}
 
     public Reviews(UUID userId, UUID reviewId, UUID placeId, String content) {
-        this.userId = userId;
+        this.reviewHistoryId = new ReviewId(userId, placeId);
         this.reviewId = reviewId;
-        this.placeId = placeId;
         this.content = content;
     }
 

@@ -8,6 +8,7 @@ import java.util.UUID;
 
 @Entity
 @Getter
+@Table(name = "IMAGES")
 public class Images {
     @Id
     @GeneratedValue(generator = "uuid2")
@@ -15,12 +16,17 @@ public class Images {
     @Column(name = "image_history_id", columnDefinition = "BINARY(16)")
     private UUID imageHistoryId;
 
+    //@ManyToOne(fetch = FetchType.LAZY)
+    //@JoinColumn(
+    //        name = "review_history_id",
+    //        nullable = false,
+    //        foreignKey = @ForeignKey(name = "FK_IMAGES_review_history_id_REVIEWS_review_history_id")
+    //)
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-            name = "review_history_id",
-            nullable = false,
-            foreignKey = @ForeignKey(name = "FK_IMAGES_review_history_id_REVIEWS_review_history_id")
-    )
+    @JoinColumns({
+            @JoinColumn(name = "userId"),
+            @JoinColumn(name = "placeId")
+    })
     private Reviews review;
 
     @Column(name = "image_id", columnDefinition = "BINARY(16)")

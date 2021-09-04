@@ -1,7 +1,7 @@
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: ${MYSQL_URL:jdbc:mysql://localhost:3306/clubmileages?serverTimezone=UTC&characterEncoding=UTF-8}
+    url: ${MYSQL_URL:jdbc:mysql://localhost:3306/clubmileages?serverTimezone=UTC&useUnicode=true&characterEncoding=UTF-8}
     username: ${MYSQL_USERNAME:root}
     password: ${MYSQL_PASSWORD:root}
   jpa:
@@ -12,7 +12,8 @@ spring:
       format_sql: true
     properties:
       hibernate.default_batch_fetch_size: 100
-  #sql:
-  #  init:
-  #    schema-locations: classpath:/db/schema.sql
-  #    mode: always
+      hibernate.id.new_generator_mappings: false
+  sql:
+    init:
+      schema-locations: classpath:/db/schema.sql
+      mode: never

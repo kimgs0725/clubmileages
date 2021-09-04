@@ -4,14 +4,12 @@ import lombok.Getter;
 import org.hibernate.annotations.GenericGenerator;
 import triple.assignment.clubmileage.model.points.PointHistoryType;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.util.UUID;
 
 @Entity
 @Getter
+@Table(name = "USERS")
 public class Users {
     @Id
     @GeneratedValue(generator = "uuid2")
