@@ -1,5 +1,9 @@
 ## 트리플 과제 2 (트리플여행자 클럽 마일리지 서비스)
 
+![Generic badge](https://img.shields.io/badge/java-11-black)
+![Generic badge](https://img.shields.io/badge/spring%20boot-2.5.4-brightgreen)
+![Generic badge](https://img.shields.io/badge/mysql-5.7-blue)
+
 ### API 소개
 - GET /point/{userId}
   - 유저 아이디가 갖고 있는 포인트와 포인트 적립/차감 내역을 반환
