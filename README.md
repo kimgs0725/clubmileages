@@ -32,6 +32,8 @@
     create database clubmileages default character set utf8 collate utf8_general_ci;
     ```
     - utf8을 세팅하는 이유는 한글 데이터를 insert시, 인코딩 에러를 방지합니다.
+- 애플리케이션 실행
+  - `./gradlew bootRun` 명령어를 통해 실행
 
 ### 에러 핸들링
 - schema가 이미 존재한다고 합니다.
