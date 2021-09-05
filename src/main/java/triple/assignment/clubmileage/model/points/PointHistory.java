@@ -42,9 +42,11 @@ public class PointHistory {
 
     protected PointHistory() {}
 
-    public PointHistory(PointHistoryType type, Integer updatePoint) {
+    public PointHistory(Users user, PointHistoryType type, Integer updatePoint) {
         this.type = type;
         this.updatePoint = updatePoint;
+        this.user = user;
+        this.user.calculatePoint(type, updatePoint);
     }
 
     public void setUser(Users user) {

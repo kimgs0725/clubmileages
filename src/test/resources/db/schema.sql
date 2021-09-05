@@ -1,63 +1,44 @@
--- 테이블 순서는 관계를 고려하여 한 번에 실행해도 에러가 발생하지 않게 정렬되었습니다.
+create table images (
+    image_id BINARY(16) not null,
+    user_id BINARY(16),
+    place_id BINARY(16),
+    primary key (image_id)
+) engine=InnoDB;
 
--- users Table Create SQL
-CREATE TABLE users
-(
-    `user_id`    BINARY(16)    NOT NULL    COMMENT '유저 아이디',
-    `cur_point`  INT           NULL        COMMENT '현재 보유하고 있는 포인트',
-    CONSTRAINT PK_users PRIMARY KEY (user_id)
-);
+create table point_history (
+    point_history_id BINARY(16) not null,
+    create_datetime datetime,
+    type varchar(255),
+    update_point integer,
+    user_id BINARY(16) not null,
+    primary key (point_history_id)
+) engine=InnoDB;
 
+create table reviews (
+    place_id BINARY(16) not null,
+    user_id BINARY(16) not null,
+    content longtext,
+    is_first_review bit,
+    review_id BINARY(16),
+    primary key (place_id, user_id)
+) engine=InnoDB;
 
--- reviews Table Create SQL
-CREATE TABLE reviews
-(
-    `review_id`  BINARY(16)    NOT NULL    COMMENT '리뷰 아이디',
-    `user_id`    BINARY(16)    NOT NULL    COMMENT '유저 아이디',
-    `place_id`   BINARY(16)    NOT NULL    COMMENT '장소 아이디',
-    `content`    LONGTEXT      NULL        COMMENT '리뷰 내용'
-);
+create index IX_REVIEWS_1 on reviews(user_id, place_id);
 
-ALTER TABLE reviews COMMENT '리뷰 변경 내역 추척';
+create table users (
+    user_id BINARY(16) not null,
+    cur_point integer DEFAULT 0,
+    primary key (user_id)
+) engine=InnoDB;
 
-CREATE INDEX IX_reviews_1
-    ON reviews(user_id, place_id);
+alter table reviews
+    add constraint UK_REVIEW_ID
+        unique (review_id);
 
-CREATE UNIQUE INDEX UQ_reviews_1
-    ON reviews(review_id);
+alter table images
+    add constraint FK_REVIEWS_user_id_place_id foreign key (user_id, place_id)
+        references reviews (place_id, user_id);
 
-ALTER TABLE reviews
-    ADD CONSTRAINT FK_reviews_user_id_users_user_id FOREIGN KEY (user_id)
-        REFERENCES users (user_id) ON DELETE RESTRICT ON UPDATE RESTRICT;
-
-
--- point_history Table Create SQL
-CREATE TABLE point_history
-(
-    `point_history_id`  BINARY(16)     NOT NULL    COMMENT 'PointHistoryID',
-    `user_id`           BINARY(16)     NULL        COMMENT 'UserID',
-    `type`              VARCHAR(45)    NULL        COMMENT 'TYPE',
-    `create_datetime`   TIMESTAMP      NULL        COMMENT 'CreateDateTime',
-    `update_point`      INT            NULL        COMMENT 'Update History Point',
-    CONSTRAINT PK_point_history PRIMARY KEY (point_history_id)
-);
-
-ALTER TABLE point_history
-    ADD CONSTRAINT FK_point_history_user_id_users_user_id FOREIGN KEY (user_id)
-        REFERENCES users (user_id) ON DELETE RESTRICT ON UPDATE RESTRICT;
-
-
--- images Table Create SQL
-CREATE TABLE images
-(
-    `image_id`   BINARY(16)    NOT NULL    COMMENT '이미지 아이디',
-    `review_id`  BINARY(16)    NULL        COMMENT '리뷰 아이디',
-    CONSTRAINT PK_images PRIMARY KEY (image_id)
-);
-
-ALTER TABLE images COMMENT '리뷰용 사진 (변경 내역이 추적되야함)';
-
-ALTER TABLE images
-    ADD CONSTRAINT FK_images_review_id_reviews_review_id FOREIGN KEY (review_id)
-        REFERENCES reviews (review_id) ON DELETE RESTRICT ON UPDATE RESTRICT;
-
+alter table point_history
+    add constraint FK_POINT_HISTORY_user_id_USERS_user_id foreign key (user_id)
+        references users (user_id);

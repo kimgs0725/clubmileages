@@ -1,5 +1,6 @@
 package triple.assignment.clubmileage.model;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,6 +17,7 @@ import triple.assignment.clubmileage.model.points.PointHistoryType;
 import triple.assignment.clubmileage.model.users.Users;
 import triple.assignment.clubmileage.model.users.UsersRepository;
 
+import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -37,6 +39,7 @@ class UsersRepositoryTest {
     private Users user1;
 
     private Users user2;
+
     @BeforeEach
     void setUp() {
         user1 = new Users();
@@ -44,6 +47,19 @@ class UsersRepositoryTest {
         user2.calculatePoint(PointHistoryType.EARN, 2);
         testEntityManager.persist(user1);
         testEntityManager.persist(user2);
+    }
+
+    @Test
+    @DisplayName("유저를 전부 조회합니다.")
+    void find_All_Test() {
+        // given
+        // when
+        List<Users> findUsers = usersRepository.findAll();
+        // then
+        assertThat(findUsers).hasSize(2);
+        for (Users findUser : findUsers) {
+            log.info("findUser.userId = {}", findUser.getUserId());
+        }
     }
 
     @Test
@@ -75,7 +91,6 @@ class UsersRepositoryTest {
         Users findUser = usersRepository.findById(userId).orElseThrow();
 
         // then
-        assertThat(findUser).isEqualTo(user1);
         assertThat(findUser.getPoint()).isZero();
     }
 
@@ -89,7 +104,6 @@ class UsersRepositoryTest {
         Users findUser = usersRepository.findById(userId).orElseThrow();
 
         // then
-        assertThat(findUser).isEqualTo(user2);
         assertThat(findUser.getPoint()).isEqualTo(2);
     }
 

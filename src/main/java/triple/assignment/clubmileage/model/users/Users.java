@@ -1,6 +1,7 @@
 package triple.assignment.clubmileage.model.users;
 
 import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 import triple.assignment.clubmileage.model.points.PointHistoryType;
 
@@ -8,7 +9,7 @@ import javax.persistence.*;
 import java.util.UUID;
 
 @Entity
-@Getter
+@Getter @Setter
 @Table(name = "USERS")
 public class Users {
     @Id

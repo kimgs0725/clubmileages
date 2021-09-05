@@ -27,11 +27,5 @@ public class AppRunner implements ApplicationRunner {
             usersRepository.save(user1);
             usersRepository.save(user2);
         }
-        log.info("user1 = {}", user1.getUserId());
-        log.info("user2 = {}", user2.getUserId());
-        log.info("place1 = {}", UUID.randomUUID());
-        log.info("place2 = {}", UUID.randomUUID());
-        log.info("review1 = {}", UUID.randomUUID());
-        log.info("review2 = {}", UUID.randomUUID());
     }
 }

@@ -32,6 +32,11 @@ public class PointServiceImpl implements PointService {
 
     private final ReviewRepository reviewRepository;
 
+    @Override
+    public List<String> showAllUser() {
+        return usersRepository.findAll().stream().map(u -> u.getUserId().toString()).collect(Collectors.toList());
+    }
+
     /**
      * 유저가 가지고 있는 포인트 현황을 반환한다.
      * 현재 가지고 있는 포인트와 포인트 히스토리를 최근 순으로 반환
@@ -94,7 +99,7 @@ public class PointServiceImpl implements PointService {
      * @param event
      */
     private void addPoint(Users user, ReviewEvent event) {
-        boolean isFirstReview = reviewRepository.existsReviewsByPlaceId(UUID.fromString(event.getPlaceId())) == 0;
+        boolean isFirstReview = reviewRepository.countReviewsByPlaceId(UUID.fromString(event.getPlaceId())) == 0;
         int point = accumulatePoint(event, isFirstReview);
         PointHistory pointHistory = createPointHistory(user, PointHistoryType.EARN, point);
         pointsHistoryRepository.save(pointHistory);
@@ -118,10 +123,7 @@ public class PointServiceImpl implements PointService {
     }
 
     private PointHistory createPointHistory(Users user, PointHistoryType historyType, Integer point) {
-        PointHistory pointHistory = new PointHistory(historyType, point);
-        user.calculatePoint(historyType, point);
-        pointHistory.setUser(user);
-        return pointHistory;
+        return new PointHistory(user, historyType, point);
     }
 
     /**
